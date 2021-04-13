@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin id="cordova-plugin-push-notifications" version="1.0.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+    <name>cordova-plugin-push-notifications</name>
+    <js-module name="PushNotification" src="www/PushNotification.js">
+        <clobbers target="pushNotification" />
+    </js-module>
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+            <feature name="PushNotification">
+                <param name="ios-package" value="PushNotification" />
+            </feature>
+        </config-file>
+        <header-file src="src/ios/PushNotification-Bridging-Header.h" />
+        <source-file src="src/ios/PushNotification.swift" />
+
+        <dependency id="cordova-plugin-add-swift-support" version="2.0.2"/>
+    </platform>
+    <platform name="android">
+        <config-file target="config.xml" parent="/*">
+            <feature name="PushNotification">
+                <param name="android-package" value="com.notifications.plugin.Notifications" />
+            </feature>
+        </config-file>
+        <config-file target="AndroidManifest.xml" parent="/manifest/application">
+            <service android:name="com.notifications.plugin.MyFirebaseMessagingService" android:exported="false">
+                <intent-filter>
+                    <action android:name="com.google.firebase.MESSAGING_EVENT" />
+                </intent-filter>
+            </service>
+        </config-file>
+        <source-file src="src/android/com/notifications/plugin/Notifications.java" target-dir="src/com/notifications/plugin" />
+        <source-file src="src/android/com/notifications/plugin/MyFirebaseMessagingService.java" target-dir="src/com/notifications/plugin" />
+
+        <framework src="com.google.gms:google-services:4.3.5" />
+        <framework src="src/android/plugin.gradle" custom="true" type="gradleReference" />
+
+        <hook src="hooks/android/configureProjectLevelDependency.js" type="before_build" />
+    </platform>
+</plugin>
