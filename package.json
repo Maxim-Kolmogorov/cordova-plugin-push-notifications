@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-push-notifications",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Push Notification for iOS (Swift) and Android (Java)",
   "cordova": {
     "id": "cordova-plugin-push-notifications",
@@ -9,13 +9,16 @@
       "android"
     ]
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Maxim-Kolmogorov/cordova-plugin-push-notifications.git"
+  },
   "keywords": [
     "ecosystem:cordova",
     "cordova-ios",
-    "cordova-android",
-    "cordova-push-notification",
-    "push-notification"
+    "cordova-android"
   ],
   "author": "maxim.kolmogorov@gmail.com",
-  "license": "ISC"
+  "license": "ISC",
+  "homepage": "https://github.com/Maxim-Kolmogorov/cordova-plugin-push-notifications#readme"
 }

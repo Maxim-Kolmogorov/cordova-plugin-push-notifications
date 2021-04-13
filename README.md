@@ -1,12 +1,16 @@
 # Cordova Push Notification plugin
 
-Simple plugin of Cordova for Push Notification in iOS and Android
+Simple plugin of Cordova for Push Notification in iOS and Android. You will be able to receive a device token and using Google services (Firebase Cloud Messages) and Apple (Apple Push Notification) to send push notifications.
 
 # Install
 
 ```bash
-npm i cordova-plugin-push-notifications
+cordova plugin add cordova-plugin-push-notifications
 ```
+
+Or 
+
+Downoload plugin in .zip arcive, unpack and:
 
 ```bash
 cordova add plugin 'path/to/plugin/in/system'
@@ -41,6 +45,9 @@ This preference need only for Android platform, example:
 
 Next, go to Firebase and registration your application in Push Notification service (Cloud Messages). Get in Firebase google-services.json and put this file in /platforms/android/app/. Where second build.gradle file and folder src.
 
+Now, you can build the project via cordova build android.
+
+
 # Plugin API
 
 JavaScript example:
@@ -56,10 +63,10 @@ window.pushNotification.registration(
 );
 ```
 
-TypeScript example:
+TypeScript example (with import of interface):
 
 ```ts
-import PushNotification from '../../src-cordova/plugins/cordova-plugin-push-notification/types'
+import PushNotification from 'cordova-plugin-push-notifications/types'
 
 window.pushNotification.registration(
   (token: string) => {
