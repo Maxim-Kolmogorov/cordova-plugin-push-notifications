@@ -45,8 +45,34 @@ This preference need only for Android platform, example:
 
 Next, go to Firebase and registration your application in Push Notification service (Cloud Messages). Get in Firebase google-services.json and put this file in /platforms/android/app/. Where second build.gradle file and folder src.
 
+You can automate this process. You can put google-services.json in the root of the Cordova project, and add an entry like this to config.xml:
+
+```xml
+  <resource-file src="res/google-services.json" target="app/google-services.json" />
+```
+
 Now, you can build the project via cordova build android.
 
+## Attention
+
+When the user receives a notification, the app icon is displayed in the status bar on iOS. Android does not provide this, so you need to add to AndroidManifest.xml:
+
+```xml
+ <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/my-icons" />
+ ```
+
+ @drawable/my-icons - is an android resource hand made in Android Studio. You can play around with the Cordova config.xml to automate this in the future and load the assets you want via:
+
+ ```xml
+  <resource-file src="res/icon" target="app/icon" />
+  <config-file target="AndroidManifest.xml" parent="/manifest/application"> 
+    <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/my-icons" />
+  </config-file>
+ ```
+
+But it took me a long time, so doing it manually will be much easier (no more than 2 minutes).
+
+See [here](https://stackoverflow.com/questions/37325051/notification-icon-with-the-new-firebase-cloud-messaging-system).
 
 # Plugin API
 
