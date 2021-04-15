@@ -55,7 +55,7 @@ Now, you can build the project via cordova build android.
 
 ## Attention
 
-When the user receives a notification, the app icon is displayed in the status bar on iOS. Android does not provide this, so you need to add to AndroidManifest.xml:
+When the user receives a notification, the app icon is displayed in the status bar on iOS. Android does not provide this, so you need to add to AndroidManifest.xml this:
 
 ```xml
  <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/my-icons" />
@@ -70,9 +70,29 @@ When the user receives a notification, the app icon is displayed in the status b
   </config-file>
  ```
 
-But it took me a long time, so doing it manually will be much easier (no more than 2 minutes).
-
 See [here](https://stackoverflow.com/questions/37325051/notification-icon-with-the-new-firebase-cloud-messaging-system).
+
+For clarity, I will attach my code for icons from config.xml:
+
+ ```xml
+  <resource-file src="drawable/drawable-anydpi-v24/notification_icons.xml" target="app/src/main/res/drawable-anydpi-v24/notification_icons.xml" />
+  <resource-file src="drawable/drawable-hdpi/notification_icons.png" target="app/src/main/res/drawable-hdpi/notification_icons.png" />
+  <resource-file src="drawable/drawable-mdpi/notification_icons.png" target="app/src/main/res/drawable-mdpi/notification_icons.png" />
+  <resource-file src="drawable/drawable-xhdpi/notification_icons.png" target="app/src/main/res/drawable-xhdpi/notification_icons.png" />
+  <resource-file src="drawable/drawable-xxhdpi/notification_icons.png" target="app/src/main/res/drawable-xxhdpi/notification_icons.png" />
+  <config-file target="AndroidManifest.xml" parent="/manifest/application"> 
+    <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/notification_icons" />
+  </config-file>
+ ```
+
+And finally, add this dependency in tag <widget\>:
+
+ ```xml
+ <widget ... xmlns:android="schemas.android.com/apk/res/android" ...></widget>
+ ```
+
+The icons themselves can be downloaded from here, from my Google Drive. Downoload [icons](https://drive.google.com/file/d/1_RinnmvIvwx157cgjn_4cwn2GBcrYQVa/view?usp=sharing).
+
 
 # Plugin API
 
@@ -110,6 +130,6 @@ If the user has allowed the sending notifications, then in the status you will r
 
 ## Android
 
-After receiving the token, you can test Push Notification directly from the Firebase Console.
+After receiving the token, you can test push notification directly from the Firebase Console.
 
 
