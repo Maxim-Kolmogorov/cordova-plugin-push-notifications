@@ -35,5 +35,7 @@
         <framework src="src/android/plugin.gradle" custom="true" type="gradleReference" />
 
         <hook src="hooks/android/configureProjectLevelDependency.js" type="before_build" />
+        <hook src="hooks/android/configureProjectLevelDependency.js" type="before_plugin_add" />
+        <hook src="hooks/android/configureProjectLevelDependency.js" type="after_platform_add" />
     </platform>
 </plugin>
