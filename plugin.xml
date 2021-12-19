@@ -4,6 +4,11 @@
     <js-module name="PushNotification" src="www/PushNotification.js">
         <clobbers target="pushNotification" />
     </js-module>
+    <engines>
+        <engine name="cordova" version=">=9.0.0"/>
+        <engine name="cordova-android" version=">=9.0.0"/>
+        <engine name="cordova-ios" version=">=5.0.0"/>
+    </engines>
     <platform name="ios">
         <config-file target="config.xml" parent="/*">
             <feature name="PushNotification">
@@ -17,22 +22,31 @@
     </platform>
     <platform name="android">
         <config-file target="config.xml" parent="/*">
+            <preference name="GradlePluginKotlinEnabled" value="true" />
+            <preference name="GradlePluginGoogleServicesEnabled" value="true" />
+            <preference name="GradlePluginKotlinCodeStyle" value="official" />
+            <preference name="GradlePluginKotlinVersion" value="1.3.50" />
+
             <feature name="PushNotification">
-                <param name="android-package" value="com.notifications.plugin.Notifications" />
+                <param name="android-package" value="notifications.Notifications" />
             </feature>
         </config-file>
+
         <config-file target="AndroidManifest.xml" parent="/manifest/application">
-            <service android:name="com.notifications.plugin.MyFirebaseMessagingService" android:exported="false">
+            <meta-data android:name="com.google.firebase.messaging.default_notification_channel_id" android:value="444"/>
+            <service android:name="notifications.MyFirebaseMessagingService" android:exported="false">
                 <intent-filter>
                     <action android:name="com.google.firebase.MESSAGING_EVENT" />
                 </intent-filter>
             </service>
         </config-file>
-        <source-file src="src/android/com/notifications/plugin/Notifications.java" target-dir="src/com/notifications/plugin" />
-        <source-file src="src/android/com/notifications/plugin/MyFirebaseMessagingService.java" target-dir="src/com/notifications/plugin" />
 
-        <framework src="com.google.gms:google-services:4.3.5" />
-        <framework src="src/android/plugin.gradle" custom="true" type="gradleReference" />
+        <source-file src="src/android/Notifications.kt" target-dir="src/main/kotlin/notifications"/>
+        <source-file src="src/android/MyFirebaseMessagingService.kt" target-dir="src/main/kotlin/notifications" />
+        <source-file src="src/android/build-extras.gradle" target-dir="."/>
+
+        <framework src="com.google.gms:google-services:4.3.10" />
+        <framework src="com.google.firebase:firebase-messaging:20.0.1" />
 
         <hook src="hooks/android/configureProjectLevelDependency.js" type="before_build" />
         <hook src="hooks/android/configureProjectLevelDependency.js" type="before_plugin_add" />

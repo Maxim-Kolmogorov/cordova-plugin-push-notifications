@@ -1,7 +1,7 @@
 {
   "name": "cordova-plugin-push-notifications",
-  "version": "1.0.2",
-  "description": "Push Notification for iOS (Swift) and Android (Java)",
+  "version": "1.1.0",
+  "description": "Push Notification for iOS (Swift) and Android (Kotlin)",
   "cordova": {
     "id": "cordova-plugin-push-notifications",
     "platforms": [

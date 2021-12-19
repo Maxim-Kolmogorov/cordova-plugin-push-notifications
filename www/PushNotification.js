@@ -1,19 +1,17 @@
-var exec = require('cordova/exec');
+var exec = require('cordova/exec')
 
-exports.registration = function(success, error) {
-  if (error == null) {
-    error = function() {}
-  }
-
-  if (typeof error != 'function') {
-    console.error('pushNotification.registration() failure: error parameter not a function');
-    return
-  }
-
+exports.registration = function (success, error = function() {}) {
   if (typeof success != 'function') {
-    console.error('pushNotification.registration() failure: success parameter must be a function');
+    console.error('pushNotification.registration() failure: success parameter must be a function')
     return
   }
+  exec(success, error, 'PushNotification', 'registration')
+}
 
-  exec(success, error, 'PushNotification', 'registration');
-};
+exports.tapped = function (success, error = function() {}) {
+  if (typeof success != 'function') {
+    console.error('pushNotification.tapped() failure: success parameter must be a function')
+    return
+  }
+  exec(success, error, 'PushNotification', 'tapped')
+}
