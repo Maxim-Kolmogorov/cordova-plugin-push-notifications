@@ -70,14 +70,11 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
     if (payload != null) {
       // For launch
       resultIntent.putExtra("pushNotification", payload)
-
-      // For real-time (pause or background)
-      Notifications.lastTapedNotification = payload
     }
 
     val resultPendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
       addNextIntentWithParentStack(resultIntent)
-      getPendingIntent(101, PendingIntent.FLAG_UPDATE_CURRENT)
+      getPendingIntent(101, PendingIntent.FLAG_CANCEL_CURRENT)
     }
 
     // Create notification
@@ -98,6 +95,4 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
     }
   }
 }
-
-// export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_251.jdk/Contents/Home 
-// export PATH=$PATH:/Users/maximkolmogorov/gradle/gradle-6.5/bin 
+ 

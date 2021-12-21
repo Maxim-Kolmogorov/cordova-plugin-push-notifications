@@ -10,11 +10,8 @@ import org.json.JSONException
 class Notifications: CordovaPlugin() {
 	companion object {
 		private const val TAG = "pushNotification"
-
-		@JvmStatic
-		var lastTapedNotification = ""
 	}
-	lateinit var context: CallbackContext
+	var lastTapedNotification = ""
 
 	override fun pluginInitialize() {
 		val activity = cordova.activity
@@ -25,19 +22,18 @@ class Notifications: CordovaPlugin() {
 				lastTapedNotification = payload
 			}
 		}
-
 		super.pluginInitialize()
 	}
 
 	@Throws(JSONException::class)
 	override fun execute(action: String, data: JSONArray, callbackContext: CallbackContext): Boolean {
-		context = callbackContext
+		val context = callbackContext
 		var result = true
 		try {
 			when (action) {
 				"registration" -> {
 					cordova.threadPool.execute {
-						getFirebaseToken()
+						getFirebaseToken(context)
 					}
 				}
 				"tapped" -> {
@@ -48,19 +44,19 @@ class Notifications: CordovaPlugin() {
 					}
 				}
 				else -> {
-					handleError("Invalid action")
+					handleError("Invalid action", context)
 					result = false
 				}
 			}
 		} catch (e: Exception) {
-			handleError(e.toString())
+			handleError(e.toString(), context)
 			result = false
 		}
 
 		return result
 	}
 
-	private fun getFirebaseToken() {
+	private fun getFirebaseToken(context: CallbackContext) {
 		FirebaseInstanceId.getInstance().instanceId.addOnSuccessListener { instanceIdResult ->
 			val token = instanceIdResult.token
 			Log.d("FIREBASE TOKEN", token)
@@ -68,7 +64,7 @@ class Notifications: CordovaPlugin() {
 		}
 	}
 
-	private fun handleError(errorMsg: String) {
+	private fun handleError(errorMsg: String, context: CallbackContext) {
 		try {
 			Log.e(TAG, errorMsg)
 			context.error(errorMsg)
