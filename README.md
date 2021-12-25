@@ -1,6 +1,6 @@
 # Cordova Push Notification plugin
 
-Simple plugin of Cordova for Push Notification in iOS and Android. You will be able to receive a device token and using Google services (Firebase Cloud Messages) and Apple (Apple Push Notification) to send push notifications.
+Simple plugin of Cordova for Push Notification in iOS and Android. You will be able to receive a device token using Google services (Firebase Cloud Messages) and Apple (Apple Push Notification) to send push notifications.
 
 # Install
 
@@ -16,11 +16,11 @@ Downoload plugin in .zip arcive, unpack and:
 cordova add plugin 'path/to/plugin/in/system'
 ```
 
-And follow the instruction...
+And follow the instructions...
 
 ## Cordova
 
-Need Cordova version >= 9.0.0
+Required Cordova version >= 9.0.0
 
 Check via:
 
@@ -30,22 +30,22 @@ cordova -v
 
 ## iOS
 
-Need Cordova iOS platform >= 5.0.0
+Required Cordova iOS platform >= 5.0.0
 
-Afther "plugin add" or "cordova build ios" command open iOS project in Xcode, go to Signing & Capabilities and click on "+" in left. Select Push Notification and lets generate SSL-certificate for push notification. Instruction see [here](https://developer.apple.com/documentation/usernotifications/setting_up_a_remote_notification_server/establishing_a_certificate-based_connection_to_apns).
+After entering "plugin add" or "cordova build ios" command open iOS project in Xcode, go to Signing & Capabilities and click on "+" in left. Select Push Notification and generate SSL-certificate for push notification. You can check the instructions [here](https://developer.apple.com/documentation/usernotifications/setting_up_a_remote_notification_server/establishing_a_certificate-based_connection_to_apns).
 
 
 ## Android
 
-Need Cordova Android platform >= 9.0.0
+Required Cordova Android platform >= 9.0.0
 
-Afther "plugin add" command, add new preference in config.xml of project:
+After "plugin add" command, add new preference in config.xml of project:
 
 ```xml
 <preference name="AndroidXEnabled" value="true" />
 ```
 
-This preference need only for Android platform, example:
+This preference is needed only for Android platform, example:
 
 ```xml
 <platform name="android">
@@ -53,9 +53,9 @@ This preference need only for Android platform, example:
 </platform>
 ```
 
-Next, go to Firebase and registration your application in Push Notification service (Cloud Messages). Get in Firebase google-services.json and put this file in /platforms/android/app/. Where second build.gradle file and folder src.
+Next, go to Firebase and register your application in Push Notification service (Cloud Messages). Get in Firebase google-services.json and put this file in /platforms/android/app/ (where second build.gradle file and folder src. are located).
 
-You can automate this process, put google-services.json in the root of the Cordova project, and add an entry like this to config.xml:
+You can automate this process by putting google-services.json in the root of the Cordova project and adding an entry like this to config.xml:
 
 ```xml
 <resource-file src="res/google-services.json" target="app/google-services.json" />
@@ -78,7 +78,7 @@ You can set your resource and color by adding this code to your AndroidManifest.
 
 ### How to create resource for Android notifications
 
-You need to add to AndroidManifest.xml this:
+You need to add this to AndroidManifest.xml
 
 ```xml
 <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/my-icons" />
@@ -95,7 +95,7 @@ And create the resource itself in the Android studio. You can play around with t
 
 See [here](https://stackoverflow.com/questions/37325051/notification-icon-with-the-new-firebase-cloud-messaging-system).
 
-For clarity, I attach my icon code from config.xml (from my own project):
+For clarity, I have attached my icon code from config.xml (from my own project):
 
  ```xml
 <resource-file src="drawable/drawable-anydpi-v24/notification_icons.xml" target="app/src/main/res/drawable-anydpi-v24/notification_icons.xml" />
@@ -114,7 +114,7 @@ And finally, add this dependency in tag <widget\>:
 <widget ... xmlns:android="schemas.android.com/apk/res/android" ...></widget>
  ```
 
-The icons themselves can be downloaded from here, from my Google Drive. Downoload [icons](https://drive.google.com/file/d/1_RinnmvIvwx157cgjn_4cwn2GBcrYQVa/view?usp=sharing).
+The icons themselves can be downloaded from here, from my Google Drive. Download [icons](https://drive.google.com/file/d/1_RinnmvIvwx157cgjn_4cwn2GBcrYQVa/view?usp=sharing).
 
 
 # Plugin API
@@ -175,7 +175,7 @@ It is obligatory to receive the "payload" data must be in the following form:
 }
 ```
 
-Importantly, do without "notification".
+Importantly, do this without "notification".
 
 # TypeScript
 
