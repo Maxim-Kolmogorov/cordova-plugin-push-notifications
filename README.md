@@ -39,7 +39,7 @@ After entering "plugin add" or "cordova build ios" command open iOS project in X
 
 Required Cordova Android platform >= 9.0.0
 
-After "plugin add" command, add new preference in config.xml of project:
+After entering "plugin add" command, add new preference in config.xml of project:
 
 ```xml
 <preference name="AndroidXEnabled" value="true" />

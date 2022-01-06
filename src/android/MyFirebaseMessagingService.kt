@@ -14,7 +14,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import com.swiftecho.testapp.MainActivity
 import java.util.concurrent.atomic.AtomicInteger
 
 
@@ -31,16 +30,31 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
   private var defaultNotificationChannelID = ""
   private var notificationManager: NotificationManager? = null
 
+  var mainActivity: Class<*>? = null
+
   override fun onCreate() {
     notificationManager = ContextCompat.getSystemService(this, NotificationManager::class.java)
 
     try {
-      val ai = packageManager.getApplicationInfo(applicationContext.packageName, PackageManager.GET_META_DATA)
+      // Get MainActivity without import
+      var launchIntent: Intent? = packageManager.getLaunchIntentForPackage(applicationContext.packageName)
+      var className = launchIntent?.component?.className as String
+      mainActivity = Class.forName(className)
+
+      // Other
+      val ai = packageManager.getApplicationInfo(
+        applicationContext.packageName,
+        PackageManager.GET_META_DATA
+      )
 
       defaultNotificationChannelID = ai.metaData.getString(mainfestChannelKey, "444")
       val channel: NotificationChannel
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        channel = NotificationChannel(defaultNotificationChannelID, "PUSH NOTIFICATIONS", NotificationManager.IMPORTANCE_HIGH)
+        channel = NotificationChannel(
+          defaultNotificationChannelID,
+          "PUSH NOTIFICATIONS",
+          NotificationManager.IMPORTANCE_HIGH
+        )
         notificationManager!!.createNotificationChannel(channel)
       }
 
@@ -66,7 +80,7 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
     val body = data["body"]
     val payload = data["payload"]
 
-    var resultIntent = Intent(this, MainActivity::class.java)
+    var resultIntent = Intent(this, mainActivity)
     if (payload != null) {
       // For launch
       resultIntent.putExtra("pushNotification", payload)
