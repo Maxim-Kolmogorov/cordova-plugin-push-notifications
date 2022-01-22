@@ -4,9 +4,12 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.RingtoneManager
+import android.net.Uri;
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -21,9 +24,9 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
   companion object {
     private const val TAG = "pushNotification"
   }
-  val mainfestIconKey = "com.google.firebase.messaging.default_notification_icon"
-  val mainfestChannelKey = "com.google.firebase.messaging.default_notification_channel_id"
-  val mainfestColorKey = "com.google.firebase.messaging.default_notification_color"
+  val mainfestIconKey     = "com.google.firebase.messaging.default_notification_icon"
+  val mainfestChannelKey  = "com.google.firebase.messaging.default_notification_channel_id"
+  val mainfestColorKey    = "com.google.firebase.messaging.default_notification_color"
 
   private var defaultNotificationIcon = 0
   private var defaultNotificationColor = 0
@@ -59,7 +62,7 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
       }
 
       defaultNotificationIcon = ai.metaData.getInt(mainfestIconKey, ai.icon)
-      defaultNotificationColor = ai.metaData.getInt(mainfestColorKey, 0)
+      defaultNotificationColor= ai.metaData.getInt(mainfestColorKey, 0)
     } catch (e: PackageManager.NameNotFoundException) {
       Log.e(TAG, "Failed to load data from AndroidManifest.xml", e)
     }
@@ -74,16 +77,22 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
     }
   }
 
-  private fun sendNotification(p0: RemoteMessage) {
-    val data = p0.data
-    val title = data["title"]
-    val body = data["body"]
-    val payload = data["payload"]
+  private fun sendNotification(p0: RemoteMessage){
+    val data      =p0.data
+    val title     =data["title"]
+    val body      =data["body"]
+    val payload   =data["payload"]
+    var channel_id=data["channel_id"]
+    //var channel_id = data["android"]["notification"]["channel_id"] //<--@TODO: make it compliant with official notification standard
 
     var resultIntent = Intent(this, mainActivity)
     if (payload != null) {
       // For launch
       resultIntent.putExtra("pushNotification", payload)
+    }
+
+    if(channel_id==null){
+      channel_id=defaultNotificationChannelID
     }
 
     val resultPendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
@@ -92,11 +101,12 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
     }
 
     // Create notification
-    val sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-    val notificationBuilder = NotificationCompat.Builder(this, defaultNotificationChannelID)
+    var soundUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE+"://"+applicationContext.packageName+"/raw/"+channel_id)
+
+    val notificationBuilder = NotificationCompat.Builder(this, channel_id)
       .setSmallIcon(defaultNotificationIcon)
       .setColor(defaultNotificationColor)
-      .setSound(sound)
+      .setSound(soundUri)
       .setContentTitle(title)
       .setContentText(body)
       .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -109,4 +119,3 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
     }
   }
 }
- 
