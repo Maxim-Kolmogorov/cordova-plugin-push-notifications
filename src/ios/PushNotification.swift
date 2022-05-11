@@ -11,7 +11,7 @@ let PushNotificationSemaphore = DispatchSemaphore(value: 0)
 // Extension AppDelegate
 @objc(AppDelegate) extension AppDelegate {
   // Catch notification if app launched after user touched on message
-  open override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey : Any]?) -> Bool {
+  open override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]?) -> Bool {
     if (launchOptions != nil) {
       if let userInfo = launchOptions?[UIApplication.LaunchOptionsKey.remoteNotification] as? [String : Any] {
         globalTapedNotification = self.parseAPSObject(obj: userInfo)
