@@ -97,7 +97,11 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
 
     val resultPendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
       addNextIntentWithParentStack(resultIntent)
-      getPendingIntent(101, PendingIntent.FLAG_CANCEL_CURRENT)
+      if (Build.VERSION.SDK_INT >= 31) {
+        getPendingIntent(101, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+      } else {
+        getPendingIntent(101, PendingIntent.FLAG_CANCEL_CURRENT)
+      }
     }
 
     // Create notification
