@@ -1,6 +1,8 @@
 # Cordova Push Notification plugin
 
 Simple plugin of Cordova for Push Notification in iOS and Android. You will be able to receive a device token using Google services (Firebase Cloud Messages) and Apple (Apple Push Notification) to send push notifications.
+ - Updated for Cordova 12
+ - Android TargetSDK 33
 
 # Install
 
@@ -156,7 +158,9 @@ It is obligatory to receive the "payload" data must be in the following form:
       title: "Hello Alex!",
       subtitle: "You pretty boy"
     },
-    payload: "payload 1234"
+    payload: "payload 1234",
+    sound :"default",
+		badge: 999
   }
 }
 ```
@@ -168,7 +172,10 @@ It is obligatory to receive the "payload" data must be in the following form:
   data: {
     title: "Hello Alex!", 
     body: "You pretty boy!", 
-    payload: "payload 1234"
+    payload: "payload 1234",
+    id: "1234",
+    large_icon: "https://example.com/icon.png",
+    image: "https://example.com/image.png"
   },
   priority: "high",
   content_available: true

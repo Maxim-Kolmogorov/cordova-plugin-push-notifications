@@ -1,5 +1,6 @@
 import UserNotifications
 
+
 // Notification info
 var globalPushNotificationToken: String = ""
 var globalTapedNotification: String = ""

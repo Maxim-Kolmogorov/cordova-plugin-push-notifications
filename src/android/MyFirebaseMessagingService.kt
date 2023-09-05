@@ -12,12 +12,17 @@ import android.media.RingtoneManager
 import android.net.Uri;
 import android.os.Build
 import android.util.Log
+import android.graphics.*
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import java.util.concurrent.atomic.AtomicInteger
+import java.io.IOException
+import java.io.InputStream
+import java.net.HttpURLConnection
+import java.net.URL
 
 
 class MyFirebaseMessagingService: FirebaseMessagingService() {
@@ -31,6 +36,7 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
   private var defaultNotificationIcon = 0
   private var defaultNotificationColor = 0
   private var defaultNotificationChannelID = ""
+  private var secondaryNotificationChannelID = ""
   private var notificationManager: NotificationManager? = null
 
   var mainActivity: Class<*>? = null
@@ -51,14 +57,22 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
       )
 
       defaultNotificationChannelID = ai.metaData.getString(mainfestChannelKey, "444")
+      // secondaryNotificationChannelID = ai.metaData.getString(mainfestChannelKey, "555")
       val channel: NotificationChannel
+      // val secondaryChannel: NotificationChannel
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         channel = NotificationChannel(
           defaultNotificationChannelID,
-          "PUSH NOTIFICATIONS",
+          "Default Channel",
           NotificationManager.IMPORTANCE_HIGH
         )
+        // secondaryChannel = NotificationChannel(
+        //   secondaryNotificationChannelID,
+        //   "Secondary Channel",
+        //   NotificationManager.IMPORTANCE_HIGH
+        // )
         notificationManager!!.createNotificationChannel(channel)
+        // notificationManager!!.createNotificationChannel(secondaryChannel)
       }
 
       defaultNotificationIcon = ai.metaData.getInt(mainfestIconKey, ai.icon)
@@ -72,7 +86,7 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
   override fun onMessageReceived(p0: RemoteMessage) {
     super.onMessageReceived(p0)
 
-    if (p0 !== null) {
+    if (p0 != null) {
       sendNotification(p0)
     }
   }
@@ -82,7 +96,11 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
     val title     =data["title"]
     val body      =data["body"]
     val payload   =data["payload"]
+    val large_icon  =data["large_icon"] // add large icon
+    val image      =data["image"] // add image 
+    val notification_id = data["id"] // add notification_id
     var channel_id=data["channel_id"]
+
     //var channel_id = data["android"]["notification"]["channel_id"] //<--@TODO: make it compliant with official notification standard
 
     var resultIntent = Intent(this, mainActivity)
@@ -106,7 +124,6 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
 
     // Create notification
     var soundUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE+"://"+applicationContext.packageName+"/raw/"+channel_id)
-
     val notificationBuilder = NotificationCompat.Builder(this, channel_id)
       .setSmallIcon(defaultNotificationIcon)
       .setColor(defaultNotificationColor)
@@ -117,9 +134,35 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
       .setAutoCancel(true)
       .setContentIntent(resultPendingIntent)
 
+    if (large_icon != null) {
+      notificationBuilder.setLargeIcon(getBitmapFromURL(large_icon))
+    }
+
+    if (image != null) {
+      notificationBuilder.setStyle(NotificationCompat.BigPictureStyle().bigPicture(getBitmapFromURL(image)).bigLargeIcon(null))
+    }
+
     with(NotificationManagerCompat.from(this)) {
-      val notificationId = (AtomicInteger(0)).incrementAndGet()
+      val notificationId = notification_id?.toInt() ?: 0
       notify(notificationId, notificationBuilder.build())
     }
   }
+
+
+  private fun getBitmapFromURL(strURL: String?): Bitmap? {
+    return try {
+      val url = URL(strURL)
+      val connection = (url.openConnection() as HttpURLConnection).apply {
+        connectTimeout = 15000
+        doInput = true
+        connect()
+      }
+      val input = connection.inputStream
+      BitmapFactory.decodeStream(input)
+    } catch (e: IOException) {
+      e.printStackTrace()
+      null
+    }
+  }
+
 }
