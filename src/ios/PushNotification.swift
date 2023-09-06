@@ -1,136 +1,104 @@
 import UserNotifications
 
+// Globale Variablen
+var globalPushToken: String = ""
+var globalNotificationTap: String = ""
 
-// Notification info
-var globalPushNotificationToken: String = ""
-var globalTapedNotification: String = ""
+@objc(PushNotificationPlugin)
+class PushNotificationPlugin: CDVPlugin {
 
-// Thread
-let PushNotificationQueue = DispatchQueue(label: "pluginPushNotificationQueue", attributes: .concurrent)
-let PushNotificationSemaphore = DispatchSemaphore(value: 0)
+  private var callbackId: String!
+  
+  override func pluginInitialize() {
+   // Notification Service Extension registrieren
+   let serviceExtension = UNNotificationServiceExtension(identifier: "NotificationService", bundle: Bundle.main)
+   UNUserNotificationCenter.current().add(serviceExtension)
+  }
 
-// Extension AppDelegate
-@objc(AppDelegate) extension AppDelegate {
-  // Catch notification if app launched after user touched on message
-  open override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]?) -> Bool {
-    if (launchOptions != nil) {
-      if let userInfo = launchOptions?[UIApplication.LaunchOptionsKey.remoteNotification] as? [String : Any] {
-        globalTapedNotification = self.parseAPSObject(obj: userInfo)
+  // Token registrieren
+  func registerForPush(command: CDVInvokedUrlCommand) {
+    callbackId = command.callbackId
+    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, _ in
+      if granted {
+        self.getNotificationSettings()  
+      } else {
+        self.sendError("Permission denied")
       }
     }
-
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
-  // Register token
-  open override func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-    let tokenParts = deviceToken.map { data -> String in
-      return String(format: "%02.2hhx", data)
-    }
-    let token = tokenParts.joined()
-    globalPushNotificationToken = token
-    PushNotificationSemaphore.signal()
-  }
-
-  // Token errors handler
-  open override func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-    print("Failed to register: \(error)")
-    PushNotificationSemaphore.signal()
-  }
-
-  // Catch notification in background (pause mode)
-  open override func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
-    globalTapedNotification = self.parseAPSObject(obj: userInfo as! [String : Any])
-  }
-    
-  func parseAPSObject(obj: [String : Any]) -> String {
-    let aps = obj["aps"] as? [String : Any]
-    if let str = aps?["payload"] as? String {
-      return str
-    }
-    return ""
-  }
-}
-
-@objc(PushNotification)
-class PushNotification: CDVPlugin {
-
-  private var pushNotificationCallBackID = ""
-
-  @objc(tapped:)
-  private func tapped(command: CDVInvokedUrlCommand) {
-    let res = globalTapedNotification
-    globalTapedNotification = ""
-
-    self.commandDelegate!.send(
-      CDVPluginResult(
-        status: CDVCommandStatus_OK,
-        messageAs: res
-      ),
-      callbackId: command.callbackId
-    )
-  }
-    
- @objc(registration:)
- private func registration(command: CDVInvokedUrlCommand) {
-   self.pushNotificationCallBackID = command.callbackId
-   self.registerForPushNotifications()
- }
-
-  private func registerForPushNotifications() {
-    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) {
-      (granted, error) in
-      print("UserNotifications permission granted: \(granted)")
-
-      guard granted else {
-        self.pluginError()
-        return
-      }
-      self.getNotificationSettings()
-    }
-  }
-
-  private func getNotificationSettings() {
-    UNUserNotificationCenter.current().getNotificationSettings { (settings) in
-      print("UserNotifications settings: \(settings)")
+  // Notification Einstellungen abrufen
+  func getNotificationSettings() {
+    UNUserNotificationCenter.current().getNotificationSettings { settings in
       guard settings.authorizationStatus == .authorized else {
-        self.pluginError()
+        self.sendError("Permission denied")
         return
       }
-
       DispatchQueue.main.async {
-        UIApplication.shared.registerForRemoteNotifications()
-      }
-
-      PushNotificationQueue.async {
-        PushNotificationSemaphore.wait(timeout: .distantFuture)
-        if (globalPushNotificationToken.count > 0) {
-          self.pluginReady(token: globalPushNotificationToken)
-        } else {
-          self.pluginError()
-        }
-        PushNotificationSemaphore.signal()
+        UIApplication.shared.registerForRemoteNotifications() 
       }
     }
   }
 
-  private func pluginReady(token: String = "") {
-    self.commandDelegate!.send(
-      CDVPluginResult(
-        status: CDVCommandStatus_OK,
-        messageAs: token
-      ),
-      callbackId: self.pushNotificationCallBackID
-    )
+  // Token registriert
+  override func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+    let token = deviceToken.reduce("", {$0 + String(format: "%02X", $1)})
+    globalPushToken = token
+    sendToken() 
   }
 
-  private func pluginError() {
-    self.commandDelegate!.send(
-      CDVPluginResult(
-        status: CDVCommandStatus_ERROR,
-        messageAs: "Permission denied"
-      ),
-      callbackId: self.pushNotificationCallBackID
-    )
+  // Token Error
+  override func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+    sendError(error.localizedDescription)
   }
+
+  // Notification in App geöffnet
+  override func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {   
+    if let aps = userInfo["aps"] as? [String: AnyObject], let alert = aps["alert"] as? String {
+      globalNotificationTap = alert 
+    }
+    completionHandler(.newData)
+  }
+
+  // Notification im Hintergrund erhalten 
+  override func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+    
+    if let url = userInfo["attachment-url"] as? String { 
+      downloadAttachment(url: url)
+    }
+
+    completionHandler(.newData)
+  }
+
+  // Anhang herunterladen
+  func downloadAttachment(url: String) {
+    let session = URLSession.shared
+    let task = session.downloadTask(with: URL(string: url)!) { location, _, _ in
+      guard let location = location else { return }
+      let filename = url.components(separatedBy: "/").last!
+      let destination = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        .appendingPathComponent(filename)
+
+      try? FileManager.default.moveItem(at: location, to: destination) 
+    }
+    task.resume()
+  }
+
+  // Abgefangene Notification senden
+  func sendTappedNotification(command: CDVInvokedUrlCommand) {
+    let tapped = globalNotificationTap
+    globalNotificationTap = ""
+    commandDelegate.send(CDVPluginResult(status: .ok, messageAs: tapped), callbackId: command.callbackId)
+  }
+
+  // Token senden 
+  func sendToken() {
+    commandDelegate.send(CDVPluginResult(status: .ok, messageAs: globalPushToken), callbackId: callbackId)
+  }
+  
+  // Fehler senden
+  func sendError(_ error: String) {
+    commandDelegate.send(CDVPluginResult(status: .error, messageAs: error), callbackId: callbackId) 
+  }
+
 }
