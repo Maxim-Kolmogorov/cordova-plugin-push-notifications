@@ -7,7 +7,7 @@ Simple plugin of Cordova for Push Notification in iOS and Android. You will be a
 # Install
 
 ```bash
-cordova plugin add cordova-plugin-push-notifications
+cordova plugin add https://github.com/SimeonLukas/cordova-plugin-push-notifications.git
 ```
 
 Or 
