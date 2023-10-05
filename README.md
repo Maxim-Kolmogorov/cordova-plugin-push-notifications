@@ -159,7 +159,7 @@ It is obligatory to receive the "payload" data must be in the following form:
     },
     payload: "payload 1234",
     sound :"default",
-    badge: 999
+badge: 999
   }
 }
 ```
