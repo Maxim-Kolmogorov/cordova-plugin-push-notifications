@@ -1,13 +1,14 @@
 <?xml version='1.0' encoding='utf-8'?>
-<plugin id="cordova-plugin-push-notifications" version="1.1.6" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+<plugin id="cordova-plugin-push-notifications" version="1.1.8" xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android">
     <name>cordova-plugin-push-notifications</name>
     <js-module name="PushNotification" src="www/PushNotification.js">
         <clobbers target="pushNotification" />
     </js-module>
     <engines>
-        <engine name="cordova" version=">=9.0.0"/>
-        <engine name="cordova-android" version=">=11.0.0"/>
-        <engine name="cordova-ios" version=">=5.0.0"/>
+        <engine name="cordova" version=">=9.0.0" />
+        <engine name="cordova-android" version=">=11.0.0" />
+        <engine name="cordova-ios" version=">=5.0.0" />
     </engines>
     <platform name="ios">
         <config-file target="config.xml" parent="/*">
@@ -18,7 +19,29 @@
         <header-file src="src/ios/PushNotification-Bridging-Header.h" />
         <source-file src="src/ios/PushNotification.swift" />
 
-        <dependency id="cordova-plugin-add-swift-support" version="2.0.2"/>
+        <dependency id="cordova-plugin-add-swift-support" version="2.0.2" />
+
+<!-- Activate Pushnotification and Remote notification -->
+
+
+        <config-file target="*-Info.plist" parent="UIBackgroundModes">
+            <array>
+                <string>remote-notification</string>
+            </array>
+        </config-file>
+        <config-file target="*-Debug.plist" parent="aps-environment">
+            <string>development</string>
+        </config-file>
+        <config-file target="*-Release.plist" parent="aps-environment">
+            <string>production</string>
+        </config-file>
+        <config-file target="*-Debug.plist" parent="com.apple.developer.aps-environment">
+            <string>development</string>
+        </config-file>
+        <config-file target="*-Release.plist" parent="com.apple.developer.aps-environment">
+            <string>production</string>
+        </config-file>
+
     </platform>
     <platform name="android">
         <config-file target="config.xml" parent="/*">
@@ -33,7 +56,8 @@
         </config-file>
 
         <config-file target="AndroidManifest.xml" parent="/manifest/application">
-            <meta-data android:name="com.google.firebase.messaging.default_notification_channel_id" android:value="444"/>
+            <meta-data android:name="com.google.firebase.messaging.default_notification_channel_id"
+                android:value="444" />
             <service android:name="notifications.MyFirebaseMessagingService" android:exported="false">
                 <intent-filter>
                     <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -41,9 +65,24 @@
             </service>
         </config-file>
 
-        <source-file src="src/android/Notifications.kt" target-dir="src/main/kotlin/notifications"/>
+
+<!-- Ask for permission  -->
+
+        <config-file target="AndroidManifest.xml" parent="/manifest">
+            <uses-permission android:name="android.permission.INTERNET" />
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+            <uses-permission android:name="android.permission.WAKE_LOCK" />
+            <uses-permission android:name="android.permission.VIBRATE" />
+            <uses-permission android:name="${applicationId}.permission.PushHandlerActivity" />
+            <!-- Target SDK 33 -->
+            <uses-permission android:name="android.permission.POST_NOTIFICATIONS" /> 
+            <permission android:name="${applicationId}.permission.PushHandlerActivity"
+                android:protectionLevel="signature"></permission>
+        </config-file>
+
+        <source-file src="src/android/Notifications.kt" target-dir="src/main/kotlin/notifications" />
         <source-file src="src/android/MyFirebaseMessagingService.kt" target-dir="src/main/kotlin/notifications" />
-        <source-file src="src/android/build-extras.gradle" target-dir="."/>
+        <source-file src="src/android/build-extras.gradle" target-dir="." />
 
         <framework src="com.google.gms:google-services:4.3.14" />
         <framework src="com.google.firebase:firebase-messaging:20.0.1" />
