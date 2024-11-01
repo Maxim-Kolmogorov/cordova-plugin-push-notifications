@@ -30,14 +30,14 @@ cordova -v
 
 ## iOS
 
-Required Cordova iOS platform >= 5.0.0
+Required Cordova iOS platform >= 6.0.0
 
 After entering "plugin add" or "cordova build ios" command open iOS project in Xcode, go to Signing & Capabilities and click on "+" in left. Select Push Notification and generate SSL-certificate for push notification. You can check the instructions [here](https://developer.apple.com/documentation/usernotifications/setting_up_a_remote_notification_server/establishing_a_certificate-based_connection_to_apns).
 
 
 ## Android
 
-Required Cordova Android platform >= 9.0.0
+Required Cordova Android platform >= 12.0.0
 
 After entering "plugin add" command, add new preference in config.xml of project:
 
@@ -165,17 +165,22 @@ It is obligatory to receive the "payload" data must be in the following form:
 
 ```js
 {
-  data: {
-    title: "Hello Alex!", 
-    body: "You pretty boy!", 
-    payload: "payload 1234"
-  },
-  priority: "high",
-  content_available: true
+  message: {
+    token: "<token>"
+    notification: {
+      title: "Hello Alex!", 
+      body: "You pretty boy!", 
+    },
+    data: {
+      channelId: "444",
+      notificationId: "1"
+      payload: "payload 1234"
+    }
+  }
 }
 ```
 
-Importantly, do this without "notification".
+channelId, notificationId, payload - Optional parameters.
 
 # TypeScript
 
