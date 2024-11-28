@@ -132,18 +132,7 @@ window.pushNotification.tapped((payload) => {
 })
 ```
 
-May be combined with the iOS "resume" [event](https://cordova.apache.org/docs/en/10.x/cordova/events/events.html#resume) when the notification was clicked in the background. On Android, such manipulations are not needed, because clicking on a notification will rerender screen (activity).
-
-```kotlin
-val resultPendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
-  addNextIntentWithParentStack(resultIntent)
-  getPendingIntent(101, PendingIntent.FLAG_CANCEL_CURRENT)
-}
-```
-
-Responsible for this action FLAG_CANCEL_CURRENT. Using other flags did not lead to redrawing, but also did not update the data in Activity Extra. Maybe I can find a solution in the future.
-
-The function "tapped" always returns an empty string. But, if there was a launch through a notification and there is a "payload" there, then it will give its contents.
+May be combined with the "resume" event when the notification was clicked in the background. The function "tapped" always returns an empty string. But, if there was a launch through a notification and there is a "payload" there, then it will give its contents.
 
 It is obligatory to receive the "payload" data must be in the following form:
 

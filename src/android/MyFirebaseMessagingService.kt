@@ -1,6 +1,7 @@
 package notifications
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -19,9 +20,11 @@ import androidx.core.content.ContextCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
+@SuppressLint("MissingFirebaseInstanceTokenRefresh")
 class MyFirebaseMessagingService: FirebaseMessagingService() {
   companion object {
     private const val TAG = "pushNotification"
+    private const val CHANNEL_NAME = "Default channel"
   }
   private val mainfestIconKey = "com.google.firebase.messaging.default_notification_icon"
   private val mainfestChannelKey = "com.google.firebase.messaging.default_notification_channel_id"
@@ -45,7 +48,7 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
       val ai: ApplicationInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         packageManager.getApplicationInfo(
           applicationContext.packageName,
-          PackageManager.ApplicationInfoFlags.of(0)
+          PackageManager.ApplicationInfoFlags.of(PackageManager.GET_META_DATA.toLong())
         )
       } else {
         packageManager.getApplicationInfo(
@@ -59,7 +62,7 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         channel = NotificationChannel(
           defaultNotificationChannelID,
-          "PUSH NOTIFICATIONS",
+          CHANNEL_NAME,
           NotificationManager.IMPORTANCE_HIGH
         )
         notificationManager!!.createNotificationChannel(channel)
@@ -95,9 +98,12 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
       notificationId = notificationIdFromData.toInt()
     }
 
-    val resultIntent = Intent(this, mainActivity)
-    if (payload != null) {
-      resultIntent.putExtra("pushNotification", payload)
+    val notifyIntent = Intent(this, mainActivity).apply {
+      flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+      if (payload != null) {
+        putExtra(Intent.EXTRA_TEXT, payload)
+      }
     }
 
     if (channelId == null) {
@@ -108,22 +114,30 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
       notificationId = (1..2147483647).random()
     }
 
-    val resultPendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
-      addNextIntentWithParentStack(resultIntent)
-      getPendingIntent(101, PendingIntent.FLAG_CANCEL_CURRENT)
+    val notifyPendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
+      addNextIntentWithParentStack(notifyIntent)
+
+      val pendingFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+      } else {
+        PendingIntent.FLAG_CANCEL_CURRENT
+      }
+
+      getPendingIntent(0, pendingFlags)
     }
 
-    val soundUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE+"://"+applicationContext.packageName+"/raw/"+channelId)
+    val soundUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + applicationContext.packageName + "/raw/" + channelId)
 
-    val notificationBuilder = NotificationCompat.Builder(this, channelId)
-      .setSmallIcon(defaultNotificationIcon)
-      .setColor(defaultNotificationColor)
-      .setSound(soundUri)
-      .setContentTitle(title)
-      .setContentText(body)
-      .setPriority(NotificationCompat.PRIORITY_HIGH)
-      .setAutoCancel(true)
-      .setContentIntent(resultPendingIntent)
+    val notificationBuilder = NotificationCompat.Builder(this, channelId).apply {
+      setSmallIcon(defaultNotificationIcon)
+      setColor(defaultNotificationColor)
+      setSound(soundUri)
+      setContentTitle(title)
+      setContentText(body)
+      setPriority(NotificationCompat.PRIORITY_HIGH)
+      setAutoCancel(true)
+      setContentIntent(notifyPendingIntent)
+    }
 
     val context = this
     with(NotificationManagerCompat.from(this)) {
