@@ -132,7 +132,13 @@ window.pushNotification.tapped((payload) => {
 })
 ```
 
-May be combined with the "resume" event when the notification was clicked in the background. The function "tapped" always returns an empty string. But, if there was a launch through a notification and there is a "payload" there, then it will give its contents.
+May be combined with the "resume" event when the notification was clicked in the background. The function "tapped" always returns an empty string. But, if there was a launch through a notification and there is a "payload" there, then it will give its contents:
+
+```js
+document.addEventListener('resume', () => {
+  // call tapped function here...
+}, false)
+```
 
 It is obligatory to receive the "payload" data must be in the following form:
 
@@ -156,11 +162,9 @@ It is obligatory to receive the "payload" data must be in the following form:
 {
   message: {
     token: "<token>"
-    notification: {
+    data: {
       title: "Hello Alex!", 
       body: "You pretty boy!", 
-    },
-    data: {
       channelId: "444",
       notificationId: "1"
       payload: "payload 1234"
@@ -170,6 +174,18 @@ It is obligatory to receive the "payload" data must be in the following form:
 ```
 
 channelId, notificationId, payload - Optional parameters.
+
+Don't use "notification" props, this is because it disable Intent update (breaking putExtra) and tapped function doesn't work.
+
+```kotlin
+val notifyIntent = Intent(this, mainActivity).apply {
+  flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+  if (payload != null) {
+    putExtra(Intent.EXTRA_TEXT, payload)
+  }
+}
+```
 
 # TypeScript
 

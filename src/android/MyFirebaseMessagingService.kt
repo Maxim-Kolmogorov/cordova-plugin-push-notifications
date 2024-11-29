@@ -82,10 +82,9 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
   }
 
   private fun sendNotification(p0: RemoteMessage) {
-    val notification = p0.notification
     val data = p0.data
-    val title = notification?.title
-    val body = notification?.body
+    val title = data["title"]
+    val body = data["body"]
 
     if (title == null || body == null) { return }
 
